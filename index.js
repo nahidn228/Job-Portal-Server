@@ -66,6 +66,13 @@ async function run() {
       const result = await jobApplicationCollection.insertOne(application);
       res.send(result);
     });
+
+    app.get("/job-applications", async (req, res) => {
+      const email = req.query.email;
+      const query = { applicant_email: email };
+      const result = await jobApplicationCollection.find(query).toArray();
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();

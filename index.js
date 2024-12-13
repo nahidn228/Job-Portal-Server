@@ -106,6 +106,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/job-applications/job/:job_id", async (req, res) => {
+      const jobId = req.params.job_id;
+      const query = { job_id: jobId };
+      const result = await jobApplicationCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.get("/job-applications", async (req, res) => {
       const email = req.query.email;
       const query = { applicant_email: email };

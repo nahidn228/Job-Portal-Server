@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
@@ -9,6 +10,7 @@ const port = process.env.PORT || 5000;
 //Middleware
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Job Portal!");
@@ -51,8 +53,13 @@ async function run() {
     //Auth related API
     app.post("/jwt", async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, "secret", { expiresIn: "1h" });
-      res.send(token);
+      const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "1h" });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: false, //http://localhost:5000/
+        })
+        .send({ success: true });
     });
 
     //Jobs related API

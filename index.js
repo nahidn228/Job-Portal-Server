@@ -1,6 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
@@ -36,7 +37,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. JobPortal successfully connected to MongoDB!"
     );
@@ -47,7 +48,21 @@ async function run() {
       .db("jobPortal")
       .collection("job_applications");
 
+    //Auth related API
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, "secret", { expiresIn: "1h" });
+      res.send(token);
+    });
+
     //Jobs related API
+    //Read homepage limit-8
+    app.get("/jobs8", async (req, res) => {
+      const cursor = jobsCollection.find().limit(8);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     //Read
     app.get("/jobs", async (req, res) => {
       const email = req.query.email;
@@ -113,7 +128,13 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/job-applications", async (req, res) => {
+    // //DELETE job application
+
+    // app.delete('/job-applications', async (req, res) => {
+
+    // })
+
+    app.get("/job-applications/", async (req, res) => {
       const email = req.query.email;
       const query = { applicant_email: email };
       const result = await jobApplicationCollection.find(query).toArray();
